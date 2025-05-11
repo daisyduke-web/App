@@ -1,6 +1,7 @@
 import 'package:superapp/screens/manager/order_track.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController usernameController = TextEditingController();
@@ -66,20 +67,38 @@ class LoginPage extends StatelessWidget {
                       final email = usernameController.text.trim();
                       final password = passwordController.text.trim();
 
-                      await FirebaseAuth.instance.signInWithEmailAndPassword(
+                      final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
                         email: email,
                         password: password,
                       );
 
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const OrderTrackingPage()),
-                      );
+                      final uid = userCredential.user!.uid;
+                      String role;
+
+                      // Try to fetch by UID
+                      final userDoc = await FirebaseFirestore.instance.collection('user').doc(uid).get();
+
+                      if (!userDoc.exists || !userDoc.data()!.containsKey('role')) {
+                        throw FirebaseAuthException(code: 'no-role', message: 'User role not defined.');
+                      }
+
+                      role = userDoc.data()!['role'];
+
+                      if (role == 'manager') {
+                        Navigator.pushReplacementNamed(context, '/manager_dash');
+                      } else if (role == 'employee') {
+                        Navigator.pushReplacementNamed(context, '/employee_dash');
+                      } else {
+                        throw FirebaseAuthException(code: 'unknown-role', message: 'Unknown user role.');
+                      }
+
                     } on FirebaseAuthException catch (e) {
                       print('Login error: ${e.code}');
                       String message = 'Login failed :( )';
                       if (e.code == 'user-not-found' || e.code == 'wrong-password') {
                         message = 'Email or password is incorrect!! Did you type something wrong?';
+                      } else if (e.code == 'no-role' || e.code == 'unknown-role') {
+                        message = e.message ?? 'An error occurred while determining user role.';
                       }
 
                       ScaffoldMessenger.of(context).showSnackBar(
