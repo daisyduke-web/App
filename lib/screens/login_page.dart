@@ -1,4 +1,6 @@
+import 'package:superapp/screens/manager/order_track.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController usernameController = TextEditingController();
@@ -25,8 +27,8 @@ class LoginPage extends StatelessWidget {
               TextField(
                 controller: usernameController,
                 decoration: InputDecoration(
-                  labelText: 'Username',
-                  hintText: 'Type your username',
+                  labelText: 'Email',
+                  hintText: 'Enter your email address',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -59,8 +61,31 @@ class LoginPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  onPressed: () {
-                    // TODO: Implement login logic
+                  onPressed: () async {
+                    try {
+                      final email = usernameController.text.trim();
+                      final password = passwordController.text.trim();
+
+                      await FirebaseAuth.instance.signInWithEmailAndPassword(
+                        email: email,
+                        password: password,
+                      );
+
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const OrderTrackingPage()),
+                      );
+                    } on FirebaseAuthException catch (e) {
+                      print('Login error: ${e.code}');
+                      String message = 'Login failed :( )';
+                      if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+                        message = 'Email or password is incorrect!! Did you type something wrong?';
+                      }
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(message)),
+                      );
+                    }
                   },
                   child: const Text(
                     'Log In',
