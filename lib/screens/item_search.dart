@@ -13,6 +13,31 @@ class _InventoryPageState extends State<InventoryPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
+  Future<void> _mockRfidScan() async {
+    // Show loading dialog with spinner and text
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          CircularProgressIndicator(),
+          SizedBox(height: 16),
+          Text("Scanning RFID :)"),
+        ],
+      ),
+    );
+    // Wait for 3 seconds
+    await Future.delayed(const Duration(seconds: 3));
+    // Close the dialog
+    Navigator.of(context).pop();
+    // Update the search field and query
+    setState(() {
+      _searchController.text = 'Kensington Pride Mango';
+      _searchQuery = 'Kensington Pride Mango';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,9 +48,14 @@ class _InventoryPageState extends State<InventoryPage> {
             padding: const EdgeInsets.all(12.0),
             child: TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Search by item name',
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.rss_feed), // RFID-like icon
+                  tooltip: 'Mock RFID Scan',
+                  onPressed: _mockRfidScan,
+                ),
               ),
               onChanged: (value) {
                 setState(() {
