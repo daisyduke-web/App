@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'forgot_password.dart'; 
+import 'forgot_password.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController usernameController = TextEditingController();
@@ -67,48 +67,74 @@ class LoginPage extends StatelessWidget {
                         final email = usernameController.text.trim();
                         final password = passwordController.text.trim();
 
-                        final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-                          email: email,
-                          password: password,
-                        );
+                        final userCredential = await FirebaseAuth.instance
+                            .signInWithEmailAndPassword(
+                              email: email,
+                              password: password,
+                            );
 
                         final uid = userCredential.user!.uid;
                         String role;
 
                         // Try to fetch by UID
-                        final userDoc = await FirebaseFirestore.instance.collection('user').doc(uid).get();
+                        final userDoc =
+                            await FirebaseFirestore.instance
+                                .collection('user')
+                                .doc(uid)
+                                .get();
 
-                        if (!userDoc.exists || !userDoc.data()!.containsKey('role')) {
-                          throw FirebaseAuthException(code: 'no-role', message: 'User role not defined.');
+                        if (!userDoc.exists ||
+                            !userDoc.data()!.containsKey('role')) {
+                          throw FirebaseAuthException(
+                            code: 'no-role',
+                            message: 'User role not defined.',
+                          );
                         }
 
                         role = userDoc.data()!['role'];
 
                         if (role == 'manager') {
-                          Navigator.pushReplacementNamed(context, '/manager_dash');
+                          Navigator.pushReplacementNamed(
+                            context,
+                            '/manager_dash',
+                          );
                         } else if (role == 'employee') {
-                          Navigator.pushReplacementNamed(context, '/employee_dash');
+                          Navigator.pushReplacementNamed(
+                            context,
+                            '/employee_dash',
+                          );
                         } else {
-                          throw FirebaseAuthException(code: 'unknown-role', message: 'Unknown user role.');
+                          throw FirebaseAuthException(
+                            code: 'unknown-role',
+                            message: 'Unknown user role.',
+                          );
                         }
-
                       } on FirebaseAuthException catch (e) {
                         print('Login error: ${e.code}');
                         String message = 'Login failed :( )';
-                        if (e.code == 'user-not-found' || e.code == 'wrong-password') {
-                          message = 'Email or password is incorrect!! Did you type something wrong?';
-                        } else if (e.code == 'no-role' || e.code == 'unknown-role') {
-                          message = e.message ?? 'An error occurred while determining user role.';
+                        if (e.code == 'user-not-found' ||
+                            e.code == 'wrong-password') {
+                          message =
+                              'Email or password is incorrect!! Did you type something wrong?';
+                        } else if (e.code == 'no-role' ||
+                            e.code == 'unknown-role') {
+                          message =
+                              e.message ??
+                              'An error occurred while determining user role.';
                         }
 
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(message)),
-                        );
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(message)));
                       }
                     },
                     child: const Text(
                       'Log In',
-                      style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -122,7 +148,9 @@ class LoginPage extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
+                          MaterialPageRoute(
+                            builder: (context) => const ForgotPasswordPage(),
+                          ),
                         );
                       },
                       child: const Text(
