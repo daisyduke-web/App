@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:superapp/screens/item_search.dart';
 import 'package:superapp/screens/item_history_search.dart';
 import 'package:superapp/screens/manager/order_track.dart';
+import 'package:superapp/screens/manager/stock_management.dart';
 
 class ManagerDashboard extends StatelessWidget {
   const ManagerDashboard({super.key});
@@ -90,6 +91,13 @@ class ManagerDashboard extends StatelessWidget {
                 _DashboardButton(
                   label: 'REGISTER EMPLOYEE',
                   onTap: () => _generateInviteLink(context),
+                ),
+                _DashboardButton(
+                  label: 'MANAGE STOCK',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => StockManagementPage()),
+                  ),
                 ),
               ],
             ),
