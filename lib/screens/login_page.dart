@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:your_project_path/screens/forgot_password.dart';
+
 
 class LoginPage extends StatelessWidget {
   final TextEditingController usernameController = TextEditingController();
@@ -119,7 +121,12 @@ class LoginPage extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      // TODO: Navigate to forgot password
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ForgotPasswordPage(),
+                        ),
+                      );
                     },
                     child: const Text(
                       'Forgot password?',
