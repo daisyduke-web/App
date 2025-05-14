@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-//Lucia 
+
 class StockAlertsPage extends StatelessWidget {
   const StockAlertsPage({super.key});
 
@@ -23,8 +23,8 @@ class StockAlertsPage extends StatelessWidget {
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
-                        .collection('items')
-                        .orderBy('stock')
+                        .collection('inventory') // Changed from 'items'
+                        .orderBy('stock_level') // Changed from 'stock'
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -42,8 +42,8 @@ class StockAlertsPage extends StatelessWidget {
                         separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
                           final item = items[index];
-                          final name = item['name'] ?? 'Unnamed';
-                          final stock = item['stock'] ?? 0;
+                          final name = item['item_name']?.toString() ?? 'Unnamed'; // Changed from 'name'
+                          final stock = item['stock_level'] ?? 0; // Changed from 'stock'
 
                           final isLowStock = stock <= 5;
 
