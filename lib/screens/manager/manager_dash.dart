@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:superapp/screens/item_search.dart';
 import 'package:superapp/screens/item_history_search.dart';
 import 'package:superapp/screens/manager/order_track.dart';
 import 'package:superapp/screens/manager/stock_management.dart';
+import 'package:superapp/screens/manager/2fa_page.dart';
+import 'package:superapp/screens/manager/stock_alert.dart';
 
 class ManagerDashboard extends StatelessWidget {
   const ManagerDashboard({super.key});
@@ -39,10 +42,20 @@ class ManagerDashboard extends StatelessWidget {
         ),
       );
     } catch (e) {
-      // Handle any errors during the process
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error generating link: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error generating link: $e')),
+      );
+    }
+  }
+
+  Future<void> _logout(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      Navigator.pushReplacementNamed(context, '/');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error logging out: $e')),
+      );
     }
   }
 
@@ -74,18 +87,27 @@ class ManagerDashboard extends StatelessWidget {
                   label: 'ITEM INQUIRY',
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const InventoryPage()),
+                    MaterialPageRoute(
+                      builder: (context) => const InventoryPage(),
+                    ),
                   ),
                 ),
                 _DashboardButton(
                   label: 'ITEM HISTORY',
-                  onTap: () {},
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ItemHistoryPage(),
+                    ),
+                  ),
                 ),
                 _DashboardButton(
                   label: 'TRACK ORDERS',
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const OrderTrackingPage()),
+                    MaterialPageRoute(
+                      builder: (context) => const OrderTrackingPage(),
+                    ),
                   ),
                 ),
                 _DashboardButton(
@@ -96,8 +118,23 @@ class ManagerDashboard extends StatelessWidget {
                   label: 'MANAGE STOCK',
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => StockManagementPage()),
+                    MaterialPageRoute(
+                      builder: (context) => const Verify2FAPage(),
+                    ),
                   ),
+                ),
+                _DashboardButton(
+                  label: 'STOCK ALERT',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const StockAlertsPage(),
+                    ),
+                  ),
+                ),
+                _DashboardButton(
+                  label: 'LOGOUT',
+                  onTap: () => _logout(context),
                 ),
               ],
             ),
