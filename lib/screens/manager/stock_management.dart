@@ -19,11 +19,9 @@ class _StockManagementPageState extends State<StockManagementPage> {
 
   void _showItemDialog({bool isEditing = false, DocumentSnapshot? doc}) {
     final _formKey = GlobalKey<FormState>();
-    // Initialize controllers for fields that need special handling
     final stockLevelController = TextEditingController(
       text: doc?.get('stock_level')?.toString() ?? '',
     );
-    // Use a map to hold string values for other fields
     final Map<String, dynamic> formData = {
       'aisle': doc?.get('aisle')?.toString() ?? '',
       'item_name': doc?.get('item_name')?.toString() ?? '',
@@ -41,7 +39,6 @@ class _StockManagementPageState extends State<StockManagementPage> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                // Text fields for string-based fields
                 ...formData.entries.map((entry) {
                   return TextFormField(
                     initialValue: entry.value,
@@ -57,7 +54,6 @@ class _StockManagementPageState extends State<StockManagementPage> {
                     },
                   );
                 }).toList(),
-                // Separate TextFormField for stock_level to handle int
                 TextFormField(
                   controller: stockLevelController,
                   decoration: InputDecoration(labelText: 'stock_level'),
@@ -84,12 +80,14 @@ class _StockManagementPageState extends State<StockManagementPage> {
                       ...formData,
                       'price': double.tryParse(formData['price']) ?? 0.0,
                       'stock_level': stockLevel,
+                      'last_updated': FieldValue.serverTimestamp(),
                     });
                   } else {
                     await _firestore.collection('inventory').add({
                       ...formData,
                       'price': double.tryParse(formData['price']) ?? 0.0,
                       'stock_level': stockLevel,
+                      'last_updated': FieldValue.serverTimestamp(),
                     });
                   }
                   Navigator.pop(context);
@@ -121,6 +119,15 @@ class _StockManagementPageState extends State<StockManagementPage> {
     }
   }
 
+  String _formatTimestamp(dynamic ts) {
+    if (ts is Timestamp) {
+      final dt = ts.toDate();
+      return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} '
+             '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    }
+    return 'Unknown';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -135,7 +142,7 @@ class _StockManagementPageState extends State<StockManagementPage> {
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore.collection('inventory').snapshots(),
+        stream: _firestore.collection('inventory').orderBy('last_updated', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
@@ -147,10 +154,21 @@ class _StockManagementPageState extends State<StockManagementPage> {
           return ListView(
             children: docs.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
+              final timestamp = data['last_updated'];
               return ListTile(
                 title: Text(data['item_name']?.toString() ?? 'Unnamed Item'),
-                subtitle: Text(
-                  'Aisle: ${data['aisle']?.toString() ?? 'N/A'} | Section: ${data['section']?.toString() ?? 'N/A'} | Price: \$${data['price']?.toString() ?? '0.0'} | Stock: ${data['stock_level']?.toString() ?? '0'}',
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Aisle: ${data['aisle']?.toString() ?? 'N/A'} | Section: ${data['section']?.toString() ?? 'N/A'} | Price: \$${data['price']?.toString() ?? '0.0'} | Stock: ${data['stock_level']?.toString() ?? '0'}',
+                    ),
+                    if (timestamp != null)
+                      Text(
+                        'Last Updated: ${_formatTimestamp(timestamp)}',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                  ],
                 ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
