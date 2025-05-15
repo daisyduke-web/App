@@ -37,7 +37,14 @@ class _ItemHistoryPageState extends State<ItemHistoryPage> {
               ],
               rows: logs.map((doc) {
                 final data = doc.data() as Map<String, dynamic>;
-                final timestamp = data['time']?.toString() ?? '';
+                final timestamp = data['time'] is Timestamp
+                    ? '${(data['time'] as Timestamp).toDate().toLocal().day.toString().padLeft(2, '0')}/'
+                      '${(data['time'] as Timestamp).toDate().toLocal().month.toString().padLeft(2, '0')}/'
+                      '${(data['time'] as Timestamp).toDate().toLocal().year} '
+                      '${(data['time'] as Timestamp).toDate().toLocal().hour == 0 || (data['time'] as Timestamp).toDate().toLocal().hour == 12 ? 12 : ((data['time'] as Timestamp).toDate().toLocal().hour % 12).toString().padLeft(2, '0')}:'
+                      '${(data['time'] as Timestamp).toDate().toLocal().minute.toString().padLeft(2, '0')} '
+                      '${(data['time'] as Timestamp).toDate().toLocal().hour < 12 ? 'AM' : 'PM'}'
+                    : data['time']?.toString() ?? '';
                 return DataRow(cells: [
                   DataCell(Text(doc.id)),
                   DataCell(Text(data['item_name'] ?? '')),
