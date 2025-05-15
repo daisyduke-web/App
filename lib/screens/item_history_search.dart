@@ -29,7 +29,7 @@ class _ItemHistoryPageState extends State<ItemHistoryPage> {
             padding: const EdgeInsets.all(20.0),
             child: DataTable(
               columns: const [
-                DataColumn(label: Text('ID')),
+                DataColumn(label: Text('RFID')),
                 DataColumn(label: Text('ITEM NAME')),
                 DataColumn(label: Text('EVENT TYPE')),
                 DataColumn(label: Text('STOCK LEVEL')),
@@ -37,9 +37,7 @@ class _ItemHistoryPageState extends State<ItemHistoryPage> {
               ],
               rows: logs.map((doc) {
                 final data = doc.data() as Map<String, dynamic>;
-                final timestamp = data['timestamp'] != null
-                    ? (data['timestamp'] as Timestamp).toDate().toLocal().toString()
-                    : '';
+                final timestamp = data['time']?.toString() ?? '';
                 return DataRow(cells: [
                   DataCell(Text(doc.id)),
                   DataCell(Text(data['item_name'] ?? '')),
